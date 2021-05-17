@@ -1,0 +1,48 @@
+clear; 
+mu=0.3; 
+M=2; 
+Iterations=512; 
+C=0.2; 
+w0=2*pi*30; 
+phi=pi/4; 
+phi1=phi; 
+phi2=phi+pi/2;
+w=zeros(M,1); 
+e=zeros(Iterations,1); 
+fs=(20:1:40)'; 
+ws=2*pi*fs; 
+A=rand(size(ws)); 
+theta=2*pi*rand(size(ws)); 
+Ts=1/(8*max(fs)); 
+for n=1:Iterations 
+t=(n-1)*Ts; 
+s(1:size(ws),n)=(cos(ws*t)); 
+signal(n)=sum(s(1:size(ws),n)); 
+pri_noise(n)=n*cos(w0*t+2*pi*n); 
+d(n)=signal(n)+pri_noise(n); 
+x(1,1)=C*cos(w0*t+phi1); 
+x(2,1)=C*cos(w0*t+phi2); 
+y=conj(w')*x; e(n)=d(n)-y; 
+w=w+2*mu*conj(e(n))*x; 
+end 
+f=0:100; 
+Se=zeros; 
+Sd=zeros; 
+Ssignal=zeros; 
+for n=1:Iterations 
+Se=Se+e(n)*exp(-sqrt(-1)*2*pi*f*(n-1)*Ts); 
+Sd=Sd+d(n)*exp(-sqrt(-1)*2*pi*f*(n-1)*Ts); 
+Ssignal=Ssignal+signal(n)*exp(-sqrt(-1)*2*pi*f*(n-1)*Ts); 
+end; 
+subplot(2,1,1); 
+xlabel('Iterations'); 
+plot(f,abs(Sd),'b'); 
+title('Noise Canceller as Notch Filter'); 
+ylabel('I/p spectrum'); 
+xlabel('Frequency'); 
+subplot(2,1,2); 
+plot(f,abs(Se),'r'); 
+ylabel('ANC o/p spectrum');
+xlabel('Frequency'); 
+text(70,250,'mu = 0.3');
+text(70,210,'C = 0.2');
